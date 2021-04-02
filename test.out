@@ -1,0 +1,32 @@
+yarn run v1.22.10
+$ npm run build:contract:debug && cd contract && npm run test && cd .. && vue-cli-service test:unit
+
+> promises@0.0.1 build:contract:debug
+> node contract/compile.js --debug
+
+
+> greeter@0.0.1 build:debug
+> asb --target debug
+
+
+> greeter@0.0.1 test
+> asp --nologo
+
+[47m[30m[Log][39m[49m Loading asc compiler
+Assemblyscript Folder:assemblyscript
+[47m[30m[Log][39m[49m Compiler loaded in [33m463.08ms[39m.
+[47m[30m[Log][39m[49m Using configuration [33mD:\AI\Projects\.fun\near\promises\contract\as-pect.config.js[39m
+[47m[30m[Log][39m[49m Using [33mSummaryReporter[39m
+[47m[30m[Log][39m[49m Including files: assembly/__tests__/**/*.spec.ts
+[47m[30m[Log][39m[49m Running tests that match: [33m(:?)[39m
+[47m[30m[Log][39m[49m Running groups that match: [33m(:?)[39m
+[47m[30m[Log][39m[49m Effective command line args:
+  [32m[TestFile.ts][39m [33mnode_modules\@as-pect\assembly\assembly\index.ts[39m --debug --binaryFile output.wasm --runtime stub --baseDir D:\AI\Projects\.fun\near\promises\contract --runPasses inlining,dce --config D:\AI\Projects\.fun\near\promises\contract\node_modules\near-sdk-as\asp.asconfig.json --explicitStart --use ASC_RTRACE=1 --exportTable --importMemory --transform D:\AI\Projects\.fun\near\promises\contract\node_modules\@as-pect\core\lib\transform\index.js
+
+[32m[1m✔ assembly/__tests__/main.spec.ts[22m[39m Pass: 1 / 1 Todo: 0 Time: 5.179ms
+  [Result]: [32m✔ PASS[39m
+   [Files]: 1 total
+  [Groups]: 2 count, 2 pass
+   [Tests]: 1 pass, 0 fail, 1 total
+    [Time]: 13595.848ms
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
