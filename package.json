@@ -22,6 +22,7 @@
     "core-js": "~3.6.5",
     "near-api-js": "~0.36.3",
     "vue": "~2.6.11",
+    "vue-moment": "^4.1.0",
     "vuetify": "^2.4.0"
   },
   "devDependencies": {

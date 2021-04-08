@@ -32,11 +32,10 @@
                 <tbody>
                   <tr v-for="item in my_promises" :key="item.name">
                     <td>{{ item.what }}</td>
-                    <td>{{ item.timestamp }}</td>
+                    <td>{{ moment.unix(item.timestamp / 1000000000).format("MM/DD/YYYY hh:mm:ss") }}</td>
                     <td>{{ item.vote_yes }}</td>
                     <td>{{ item.vote_no }}</td>
                     <td>{{ item.canView.length == 0 ? "true" : "false (" + item.canView.length + ")"}}</td>
-                    <td>{{ JSON.stringify(item) }}</td>
                   </tr>
                 </tbody>
               </template>
