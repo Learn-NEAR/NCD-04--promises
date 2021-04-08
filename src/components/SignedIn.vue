@@ -14,27 +14,6 @@
         ></label>
         {{ accountId }}
       </h1>
-      <!--
-      <form v-on:submit.prevent="saveGreeting">
-        <fieldset ref="fieldset">
-          <label
-            for="greeting"
-            style="display: block; color: var(--gray); margin-bottom: 0.5em"
-          >Change greeting</label
-          >
-          <div style="display: flex">
-            <input
-              v-model="newGreeting"
-              autocomplete="off"
-              id="greeting"
-              style="flex: 1"
-            />
-            <button id="save" style="border-radius: 0 5px 5px 0">Save</button>
-          </div>
-        </fieldset>
-      </form>
-      -->
-
       <v-container class="grey lighten-5">
         <v-row>
           <v-col>
@@ -44,17 +23,20 @@
                 <thead>
                   <tr>
                     <th class="text-left">What</th>
-                    <th class="text-left">When</th>
+                    <th class="text-left">Timestamp</th>
                     <th class="text-left">Yes votes</th>
                     <th class="text-left">No votes</th>
+                    <th class="text-left">Public</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="item in my_promises" :key="item.name">
                     <td>{{ item.what }}</td>
-                    <td>{{ item.when }}</td>
+                    <td>{{ item.timestamp }}</td>
                     <td>{{ item.vote_yes }}</td>
                     <td>{{ item.vote_no }}</td>
+                    <td>{{ item.canView.length == 0 ? "true" : "false (" + item.canView.length + ")"}}</td>
+                    <td>{{ JSON.stringify(item) }}</td>
                   </tr>
                 </tbody>
               </template>
@@ -84,6 +66,11 @@
                         v-model="promise"
                       >
                       </v-text-field>
+                      <v-text-field
+                        placeholder="List of voters..."
+                        v-model="voters"
+                      >
+                      </v-text-field>
                     </v-card-text>
 
                     <v-divider></v-divider>
@@ -93,7 +80,7 @@
                       <v-btn
                         color="primary"
                         text
-                        @click="addPromise(promise)"
+                        @click="addPromise(promise, voters)"
                       >
                         Yes, I do!
                       </v-btn>
@@ -115,6 +102,8 @@
                     <th class="text-left">When</th>
                     <th class="text-left">Yes votes</th>
                     <th class="text-left">No votes</th>
+                    <th class="text-left"></th>
+                    <th class="text-left">Public</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -128,6 +117,7 @@
                       <v-btn :disabled="item.votes.hasOwnProperty(accountId) && (item.votes[accountId] == 1)" dark small color="green" @click="voteYes(item)"/>
                       <v-btn :disabled="item.votes.hasOwnProperty(accountId) && (item.votes[accountId] == 0)" dark small color="red" @click="voteNo(item)"/>
                     </td>
+                    <td>{{item.canView.length == 0 ? "true" : "false (" + item.canView.length + ")"}}</td>
                   </tr>
                 </tbody>
               </template>
@@ -158,10 +148,9 @@ export default {
 
   beforeMount() {
     if (this.isSignedIn) {
-
       this.infiniteUpdate = () => {
         this.updatePromises(false).then(() => {
-          return this.delay(10);
+          return this.delay(1000);
         }).then(this.infiniteUpdate)
       }
 
@@ -179,6 +168,7 @@ export default {
       notificationVisible: false,
       dialog: false,
       promise: "",
+      voters: "",
       my_promises: [
       ],
       others_promises: [
@@ -212,14 +202,32 @@ export default {
       })
     },
 
-    addPromise: function(promise) {
+    addPromise: function(promise, voters) {
       this.method = "addPromise"
       this.notificationVisible = true
 
       console.log('promise: ', promise)
-      window.contract
-      .makePromise({ accountId: window.accountId, what: promise })
-      .then((addedPromise) => {
+
+      var promiseMakingPromise = null
+      if(voters != '') {
+        var splitted = []
+        if(voters.indexOf(', ') != -1)
+          splitted = voters.split(', ');
+        else if(voters.indexOf(',') != -1)
+          splitted = voters.split(',');
+        else if(voters.indexOf(' ') != -1)
+          splitted = voters.split(' ');
+        else 
+          splitted = [voters]
+
+        promiseMakingPromise = window.contract
+          .makeExtendedPromise({ accountId: window.accountId, what: promise, viewers: splitted, voters: splitted })
+      } else {
+        promiseMakingPromise = window.contract
+          .makePromise({ accountId: window.accountId, what: promise })
+      }
+
+      promiseMakingPromise.then((addedPromise) => {
         console.log('promise added: ', addedPromise)
         const promiseItem = Object.assign(addedPromise.promise, {id: addedPromise.id})
 
@@ -230,6 +238,7 @@ export default {
         this.notificationVisible = false
       });
 
+      this.voters = ""
       this.promise = ""
       this.dialog = false
     },

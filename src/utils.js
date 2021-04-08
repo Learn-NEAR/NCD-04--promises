@@ -22,7 +22,7 @@ export async function initContract() {
     // View methods are read only. They don't modify the state, but usually return some value.
     viewMethods: [],
     // Change methods can modify the state. But you don't receive the returned value when called.
-    changeMethods: ['makePromise', 'getPromises', 'vote'],
+    changeMethods: ['makePromise', 'makeExtendedPromise', 'getPromises', 'vote'],
   })
 }
 
@@ -37,5 +37,5 @@ export function login() {
   // user's behalf.
   // This works by creating a new access key for the user's account and storing
   // the private key in localStorage.
-  window.walletConnection.requestSignIn(nearConfig.contractName)
+  window.walletConnection.requestSignIn(nearConfig.contractName, "Promises")
 }

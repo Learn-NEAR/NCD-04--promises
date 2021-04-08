@@ -5,12 +5,12 @@
  *
  */
 
-import { Context, logging, PersistentMap, PersistentVector, storage } from 'near-sdk-as'
+import { Context, env, logging, PersistentMap, PersistentVector, storage } from 'near-sdk-as'
 import { Promise, ReturnedPromise, Vote, promises } from './model';
 
 /**
  * Returns an array of last N promises.\
- * NOTE: This is a view method. Which means it should NOT modify the state.
+ * NOTE: This is a NOT a view method at the moment. Which means it costs money so shouldn't be executed too frequently.
  */
  export function getPromises(target: string): ReturnedPromise[] {
   assert(Context.predecessor == Context.sender)
@@ -22,12 +22,16 @@ import { Promise, ReturnedPromise, Vote, promises } from './model';
   for(let i = 0; i < promises.length; ++i) {
     // logging.log('getPromises: promise = ' + promises[i].who + ', promises[i].who === Context.sender = ' + (promises[i].who == Context.sender).toString())
 
-    if(promises[i].who == Context.sender) {
-      if(forMe == true)
-        result.push(new ReturnedPromise(i, promises[i]))
+    let promise = promises[i]
+    if(forMe == true) {
+      if(promise.who == Context.sender)
+        result.push(new ReturnedPromise(i, promise))
     } else {
-      if(forMe == false)
-        result.push(new ReturnedPromise(i, promises[i]))
+      var isPublicNotMinePromise = promise.canView.size == 0 && promise.who != Context.sender
+      var canViewPromise = (isPublicNotMinePromise ? true : promise.canView.has(Context.sender))
+
+      if(canViewPromise)
+        result.push(new ReturnedPromise(i, promise))
     }
   }
   return result;
@@ -39,7 +43,10 @@ export function vote(promiseId: i32, value: boolean) : ReturnedPromise {
 
   logging.log('vote: sender = ' + Context.sender + ', promiseId = ' + promiseId.toString() + ', value = ' + value.toString() + ', total promises = ' + promises.length.toString())
   let promise = promises[promiseId];
-  assert(promise.who != Context.sender)
+
+  let isPublicPromise = promise.canVote.size == 0
+  let isAllowedToVote = isPublicPromise ? (promise.who != Context.sender) : promise.canVote.has(Context.sender)
+  assert(isAllowedToVote)
 
   let newVote = value == true ? Vote.Yes : Vote.No
   if(promise.votes.has(Context.predecessor)) {
@@ -86,6 +93,34 @@ export function vote(promiseId: i32, value: boolean) : ReturnedPromise {
 
   promises.replace(promiseId, promise);
   return new ReturnedPromise(promiseId, promises[promiseId])
+}
+
+export function makeExtendedPromise(what: string, viewers: string[], voters: string[]) : ReturnedPromise {
+  assert(Context.predecessor == Context.sender)
+
+  var promise = new Promise(what)
+  for(let i = 0; i < viewers.length; ++i) {
+    let viewer = viewers[i];
+    assert(env.isValidAccountID(viewer), "viewer account is invalid")
+
+    logging.log('adding viewer: ' + viewer)
+    promise.canView.add(viewer)
+  }
+
+  for(let i = 0; i < voters.length; ++i) {
+    let voter = voters[i];
+    assert(env.isValidAccountID(voter), "voter account is invalid")
+
+    logging.log('adding voter: ' + voter)
+    promise.canVote.add(voter)
+
+    // all voters are viewers too, otherwise how can they vote?
+    logging.log('adding voter to viewers: ' + voter)
+    promise.canView.add(voter)
+  }
+
+  promises.push(promise);
+  return new ReturnedPromise(promises.length - 1, promises[promises.length - 1])
 }
 
 export function makePromise(what: string) : ReturnedPromise {
