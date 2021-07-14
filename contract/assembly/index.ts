@@ -13,7 +13,7 @@ import { Promise, ReturnedPromise, Vote, promises } from './model';
  * NOTE: This is a NOT a view method at the moment. Which means it costs money so shouldn't be executed too frequently.
  */
 export function getPromises(target: string): ReturnedPromise[] {
-  assert(Context.predecessor == Context.sender)
+  assertDirectCall()
 
   const result = new Array<ReturnedPromise>()
   const forMe = (target == 'me')
@@ -38,7 +38,7 @@ export function getPromises(target: string): ReturnedPromise[] {
 }
 
 export function vote(promiseId: i32, value: boolean): ReturnedPromise {
-  assert(Context.predecessor == Context.sender)
+  assertDirectCall()
   assert(promiseId >= 0 && promiseId < promises.length)
 
   logging.log('vote: sender = ' + Context.sender + ', promiseId = ' + promiseId.toString() + ', value = ' + value.toString() + ', total promises = ' + promises.length.toString())
@@ -95,7 +95,7 @@ export function vote(promiseId: i32, value: boolean): ReturnedPromise {
 }
 
 export function makePromise(what: string, viewers: string[] = [], voters: string[] = []): ReturnedPromise {
-  assert(Context.predecessor == Context.sender)
+  assertDirectCall()
 
   var promise = new Promise(what)
   for (let i = 0; i < viewers.length; ++i) {
@@ -124,8 +124,13 @@ export function makePromise(what: string, viewers: string[] = [], voters: string
 
 // debug only
 export function clearAll(): void {
-  assert(Context.predecessor == Context.sender)
+  assertDirectCall()
 
   while (promises.length !== 0)
     promises.pop();
+}
+
+function assertDirectCall(): void {
+  const message = "This method must be called directly.  No cross-contract calls allowed"
+  assert(Context.predecessor == Context.sender, message)
 }
