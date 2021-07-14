@@ -1,5 +1,9 @@
 import { Context, PersistentVector } from "near-sdk-as";
 
+type AccountId = string;
+type VoteTally = u64;
+type Timestamp = u64;
+
 export enum Vote {
   No,
   Yes
@@ -10,13 +14,13 @@ export enum Vote {
  */
 @nearBindgen
 export class Promise {
-  who: string = Context.sender;
-  vote_yes: u64 = 0;
-  vote_no: u64 = 0;
-  timestamp: u64 = Context.blockTimestamp;
-  votes: Map<string, Vote> = new Map<string, Vote>();
-  canView: Set<string> = new Set<string>();
-  canVote: Set<string> = new Set<string>();
+  who: AccountId = Context.sender;
+  vote_yes: VoteTally = 0;
+  vote_no: VoteTally = 0;
+  timestamp: Timestamp = Context.blockTimestamp;
+  votes: Map<AccountId, Vote> = new Map<AccountId, Vote>();
+  canView: Set<AccountId> = new Set<AccountId>();
+  canVote: Set<AccountId> = new Set<AccountId>();
 
   constructor(public what: string) { }
 }
