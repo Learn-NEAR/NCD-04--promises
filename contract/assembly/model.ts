@@ -10,18 +10,15 @@ export enum Vote {
  */
 @nearBindgen
 export class Promise {
-  who: string;
+  who: string = Context.sender;
   vote_yes: u64 = 0;
   vote_no: u64 = 0;
-  timestamp: u64 = 0;
+  timestamp: u64 = Context.blockTimestamp;
   votes: Map<string, Vote> = new Map<string, Vote>();
   canView: Set<string> = new Set<string>();
   canVote: Set<string> = new Set<string>();
 
-  constructor(public what: string) {
-    this.who = Context.sender;
-    this.timestamp = Context.blockTimestamp;
-  }
+  constructor(public what: string) { }
 }
 
 @nearBindgen
