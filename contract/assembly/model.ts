@@ -1,4 +1,4 @@
-import { Context, PersistentMap, PersistentVector } from "near-sdk-as";
+import { Context, PersistentVector } from "near-sdk-as";
 
 export enum Vote {
   No,

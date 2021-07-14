@@ -5,7 +5,7 @@
  *
  */
 
-import { Context, env, logging, PersistentMap, PersistentVector, storage } from 'near-sdk-as'
+import { Context, env, logging } from 'near-sdk-as'
 import { Promise, ReturnedPromise, Vote, promises } from './model';
 
 /**
