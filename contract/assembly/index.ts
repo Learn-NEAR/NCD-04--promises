@@ -97,29 +97,10 @@ export function vote(promiseId: i32, value: boolean): ReturnedPromise {
 export function makePromise(what: string, viewers: string[] = [], voters: string[] = []): ReturnedPromise {
   assertDirectCall()
 
-  const promise = new Promise(what)
-  for (let i = 0; i < viewers.length; ++i) {
-    let viewer = viewers[i];
-    assert(env.isValidAccountID(viewer), "viewer account is invalid")
-
-    logging.log('adding viewer: ' + viewer)
-    promise.canView.add(viewer)
-  }
-
-  for (let i = 0; i < voters.length; ++i) {
-    let voter = voters[i];
-    assert(env.isValidAccountID(voter), "voter account is invalid")
-
-    logging.log('adding voter: ' + voter)
-    promise.canVote.add(voter)
-
-    // all voters are viewers too, otherwise how can they vote?
-    logging.log('adding voter to viewers: ' + voter)
-    promise.canView.add(voter)
-  }
+  const promise = new Promise(what, viewers, voters)
 
   promises.push(promise);
-  return new ReturnedPromise(promises.length - 1, promises[promises.length - 1])
+  return new ReturnedPromise(promises.length - 1, promise)
 }
 
 // debug only

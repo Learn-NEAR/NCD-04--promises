@@ -1,4 +1,4 @@
-import { Context, PersistentVector } from "near-sdk-as";
+import { Context, PersistentVector, logging, env } from "near-sdk-as";
 
 type AccountId = string;
 type VoteTally = u64;
@@ -22,7 +22,27 @@ export class Promise {
   canView: Set<AccountId> = new Set<AccountId>();
   canVote: Set<AccountId> = new Set<AccountId>();
 
-  constructor(public what: string) { }
+  constructor(public what: string, viewers: AccountId[], voters: AccountId[]) {
+    for (let i = 0; i < viewers.length; ++i) {
+      let viewer = viewers[i];
+      assert(env.isValidAccountID(viewer), `Viewer (${viewer}) account is invalid`)
+
+      logging.log('adding viewer: ' + viewer)
+      this.canView.add(viewer)
+    }
+
+    for (let i = 0; i < voters.length; ++i) {
+      let voter = voters[i];
+      assert(env.isValidAccountID(voter), `Voter (${voter}) account is invalid`)
+
+      logging.log('adding voter: ' + voter)
+      this.canVote.add(voter)
+
+      // all voters are viewers too, otherwise how can they vote?
+      logging.log('adding voter to viewers: ' + voter)
+      this.canView.add(voter)
+    }
+  }
 }
 
 @nearBindgen
