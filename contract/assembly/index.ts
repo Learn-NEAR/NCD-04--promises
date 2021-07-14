@@ -5,17 +5,17 @@
  *
  */
 
-import { Context, env, logging } from 'near-sdk-as'
-import { Promise, ReturnedPromise, Vote, promises } from './model';
+import { Context, logging } from 'near-sdk-as'
+import { Promise, Vote, promises } from './model';
 
 /**
  * Returns an array of last N promises.\
  * NOTE: This is a NOT a view method at the moment. Which means it costs money so shouldn't be executed too frequently.
  */
-export function getPromises(target: string): ReturnedPromise[] {
+export function getPromises(target: string): Promise[] {
   assertDirectCall()
 
-  const result = new Array<ReturnedPromise>()
+  const result = new Array<Promise>()
   const forMe = (target == 'me')
   // logging.log('getPromises: sender = ' + Context.sender + ', target = ' + target + ', forMe = ' + forMe.toString())
 
@@ -25,19 +25,19 @@ export function getPromises(target: string): ReturnedPromise[] {
     let promise = promises[i]
     if (forMe == true) {
       if (promise.who == Context.sender)
-        result.push(new ReturnedPromise(i, promise))
+        result.push(promise)
     } else {
       const isPublicNotMinePromise = promise.canView.size == 0 && promise.who != Context.sender
       const canViewPromise = (isPublicNotMinePromise ? true : promise.canView.has(Context.sender))
 
       if (canViewPromise)
-        result.push(new ReturnedPromise(i, promise))
+        result.push(promise)
     }
   }
   return result;
 }
 
-export function vote(promiseId: i32, value: boolean): ReturnedPromise {
+export function vote(promiseId: i32, value: boolean): Promise {
   assertDirectCall()
   assert(promiseId >= 0 && promiseId < promises.length)
 
@@ -91,16 +91,15 @@ export function vote(promiseId: i32, value: boolean): ReturnedPromise {
     + promise.vote_yes.toString() + "/" + promise.vote_no.toString())
 
   promises.replace(promiseId, promise);
-  return new ReturnedPromise(promiseId, promises[promiseId])
+  return promise
 }
 
-export function makePromise(what: string, viewers: string[] = [], voters: string[] = []): ReturnedPromise {
+export function makePromise(what: string, viewers: string[] = [], voters: string[] = []): Promise {
   assertDirectCall()
 
   const promise = new Promise(what, viewers, voters)
 
-  promises.push(promise);
-  return new ReturnedPromise(promises.length - 1, promise)
+  return promise
 }
 
 // debug only
