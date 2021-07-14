@@ -1,11 +1,11 @@
 import { Context, PersistentMap, PersistentVector } from "near-sdk-as";
 
 export enum Vote {
-    No,
-    Yes
+  No,
+  Yes
 }
 
-/** 
+/**
  * Exporting a new class Promise so it can be used outside of this file.
  */
 @nearBindgen
@@ -26,8 +26,8 @@ export class Promise {
 
 @nearBindgen
 export class ReturnedPromise {
-    constructor(public id: i32, public promise: Promise) {
-    }    
+  constructor(public id: i32, public promise: Promise) {
+  }
 }
 
 /**
