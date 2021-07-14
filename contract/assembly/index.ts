@@ -94,7 +94,7 @@ export function vote(promiseId: i32, value: boolean): ReturnedPromise {
   return new ReturnedPromise(promiseId, promises[promiseId])
 }
 
-export function makeExtendedPromise(what: string, viewers: string[], voters: string[]): ReturnedPromise {
+export function makePromise(what: string, viewers: string[] = [], voters: string[] = []): ReturnedPromise {
   assert(Context.predecessor == Context.sender)
 
   var promise = new Promise(what)
@@ -119,13 +119,6 @@ export function makeExtendedPromise(what: string, viewers: string[], voters: str
   }
 
   promises.push(promise);
-  return new ReturnedPromise(promises.length - 1, promises[promises.length - 1])
-}
-
-export function makePromise(what: string): ReturnedPromise {
-  assert(Context.predecessor == Context.sender)
-
-  promises.push(new Promise(what));
   return new ReturnedPromise(promises.length - 1, promises[promises.length - 1])
 }
 
