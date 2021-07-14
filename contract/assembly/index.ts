@@ -27,8 +27,8 @@ export function getPromises(target: string): ReturnedPromise[] {
       if (promise.who == Context.sender)
         result.push(new ReturnedPromise(i, promise))
     } else {
-      var isPublicNotMinePromise = promise.canView.size == 0 && promise.who != Context.sender
-      var canViewPromise = (isPublicNotMinePromise ? true : promise.canView.has(Context.sender))
+      const isPublicNotMinePromise = promise.canView.size == 0 && promise.who != Context.sender
+      const canViewPromise = (isPublicNotMinePromise ? true : promise.canView.has(Context.sender))
 
       if (canViewPromise)
         result.push(new ReturnedPromise(i, promise))
@@ -97,7 +97,7 @@ export function vote(promiseId: i32, value: boolean): ReturnedPromise {
 export function makePromise(what: string, viewers: string[] = [], voters: string[] = []): ReturnedPromise {
   assertDirectCall()
 
-  var promise = new Promise(what)
+  const promise = new Promise(what)
   for (let i = 0; i < viewers.length; ++i) {
     let viewer = viewers[i];
     assert(env.isValidAccountID(viewer), "viewer account is invalid")
