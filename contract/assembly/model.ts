@@ -1,33 +1,53 @@
-import { Context, PersistentMap, PersistentVector } from "near-sdk-as";
+import { Context, PersistentVector, logging, env } from "near-sdk-as";
+
+type PromiseId = i32;
+type AccountId = string;
+type VoteTally = u64;
+type Timestamp = u64;
 
 export enum Vote {
-    No,
-    Yes
+  No,
+  Yes
 }
 
-/** 
+/**
  * Exporting a new class Promise so it can be used outside of this file.
  */
 @nearBindgen
 export class Promise {
-  who: string;
-  vote_yes: u64 = 0;
-  vote_no: u64 = 0;
-  timestamp: u64 = 0;
-  votes: Map<string, Vote> = new Map<string, Vote>();
-  canView: Set<string> = new Set<string>();
-  canVote: Set<string> = new Set<string>();
+  id: PromiseId;
+  who: AccountId = Context.sender;
+  vote_yes: VoteTally = 0;
+  vote_no: VoteTally = 0;
+  timestamp: Timestamp = Context.blockTimestamp;
+  votes: Map<AccountId, Vote> = new Map<AccountId, Vote>();
+  canView: Set<AccountId> = new Set<AccountId>();
+  canVote: Set<AccountId> = new Set<AccountId>();
 
-  constructor(public what: string) {
-    this.who = Context.sender;
-    this.timestamp = Context.blockTimestamp;
+  constructor(public what: string, viewers: AccountId[], voters: AccountId[]) {
+    for (let i = 0; i < viewers.length; ++i) {
+      let viewer = viewers[i];
+      assert(env.isValidAccountID(viewer), `Viewer (${viewer}) account is invalid`)
+
+      logging.log('adding viewer: ' + viewer)
+      this.canView.add(viewer)
+    }
+
+    for (let i = 0; i < voters.length; ++i) {
+      let voter = voters[i];
+      assert(env.isValidAccountID(voter), `Voter (${voter}) account is invalid`)
+
+      logging.log('adding voter: ' + voter)
+      this.canVote.add(voter)
+
+      // all voters are viewers too, otherwise how can they vote?
+      logging.log('adding voter to viewers: ' + voter)
+      this.canView.add(voter)
+    }
+
+    this.id = promises.length
+    promises.push(this);
   }
-}
-
-@nearBindgen
-export class ReturnedPromise {
-    constructor(public id: i32, public promise: Promise) {
-    }    
 }
 
 /**
